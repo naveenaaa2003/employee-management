@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Employee Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #eef2ff;
+    --danger: #e11d48;
+    --danger-light: #fff1f2;
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+    --ink: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f7f8fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 2.5rem 3rem;
+    color: var(--ink);
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .topbar h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .topbar .subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+  }
+  .badge-row { display: flex; gap: 0.4rem; }
+  .tech-badge {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 1.75rem;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 1px 3px rgba(16,24,40,0.06);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+  }
+  .card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+  }
+  label.field-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+    display: block;
+  }
+  input, select {
+    width: 100%;
+    padding: 0.65rem 0.8rem;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fafafa;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    background: white;
+  }
+
+  button {
+    border: none;
+    padding: 0.65rem 1.25rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: transform 0.05s, background 0.15s, box-shadow 0.15s;
+  }
+  button:active { transform: scale(0.97); }
+  button.primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 1px 2px rgba(79,70,229,0.3);
+  }
+  button.primary:hover { background: var(--primary-dark); }
+  button.secondary {
+    background: white;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+  }
+  button.secondary:hover { background: #f3f4f6; }
+  button.danger-outline {
+    background: white;
+    color: var(--danger);
+    border: 1.5px solid #fecdd3;
+  }
+  button.danger-outline:hover { background: var(--danger-light); }
+  button.edit-outline {
+    background: white;
+    color: var(--primary);
+    border: 1.5px solid #c7d2fe;
+  }
+  button.edit-outline:hover { background: var(--primary-light); }
+
+  .stats { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .stat-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); }
+
+  .filters { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .filters input { flex: 1; min-width: 180px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    padding: 0.7rem 0.6rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 700;
+    border-bottom: 1.5px solid var(--border);
+  }
+  tbody td {
+    padding: 0.75rem 0.6rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f1f2f6;
+  }
+  tbody tr:hover { background: #fafbff; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .person-cell { display: flex; align-items: center; gap: 0.65rem; }
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #818cf8);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+  .person-name { font-weight: 600; }
+  .person-email { color: var(--muted); font-size: 0.82rem; }
+
+  .dept-badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .salary-cell { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .actions { display: flex; gap: 0.4rem; }
+  .actions button { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
+
+  .empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--muted);
+  }
+  .empty-state .big { font-size: 2rem; margin-bottom: 0.4rem; }
+
+  .msg {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .msg.error { background: var(--danger-light); color: #be123c; border: 1px solid #fecdd3; }
+  .msg.success { background: var(--success-light); color: #15803d; border: 1px solid #bbf7d0; }
+
+  .form-footer { display: flex; gap: 0.6rem; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>Employee Management System</h1>
+    <div class="subtitle">Internal directory &middot; add, search and manage employee records</div>
+  </div>
+  <div class="badge-row">
+    <span class="tech-badge">Spring Boot</span>
+    <span class="tech-badge">Hibernate / JPA</span>
+    <span class="tech-badge">PostgreSQL</span>
+  </div>
+</div>
+
+<div id="messageArea"></div>
+
+<div class="card">
+  <h3 id="formTitle">Add Employee</h3>
+  <input type="hidden" id="employeeId">
+  <div class="form-grid">
+    <div>
+      <label class="field-label">Name</label>
+      <input type="text" id="name" placeholder="e.g. Priya Sharma">
+    </div>
+    <div>
+      <label class="field-label">Email</label>
+      <input type="email" id="email" placeholder="e.g. priya@company.com">
+    </div>
+    <div>
+      <label class="field-label">Department</label>
+      <input type="text" id="department" placeholder="e.g. Engineering">
+    </div>
+    <div>
+      <label class="field-label">Salary</label>
+      <input type="number" id="salary" placeholder="e.g. 65000">
+    </div>
+  </div>
+  <div class="form-footer">
+    <button class="primary" onclick="saveEmployee()" id="saveBtn">Add Employee</button>
+    <button class="secondary" onclick="resetForm()" id="cancelBtn" style="display:none;">Cancel Edit</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="stats" id="statsArea"></div>
+  <div class="filters">
+    <input type="text" id="searchName" placeholder="Search by name...">
+    <input type="text" id="filterDept" placeholder="Filter by department...">
+    <button class="primary" onclick="applyFilters()">Search</button>
+    <button class="secondary" onclick="loadEmployees()">Show All</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Employee</th><th>Department</th><th>Salary</th><th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="employeeTableBody"></tbody>
+  </table>
+</div>
+
+<script>
+const API_BASE = '/employees';
+
+function initials(name) {
+  return (name || '').split(' ').filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('');
+}
+
+async function loadEmployees() {
+  const res = await fetch(`${API_BASE}?page=0&size=50`);
+  const data = await res.json();
+  renderTable(data.content);
+  loadStats();
+}
+
+async function loadStats() {
+  const deptRes = await fetch(`${API_BASE}/departments`);
+  const departments = await deptRes.json();
+  const statsArea = document.getElementById('statsArea');
+  statsArea.innerHTML = '';
+  for (const dept of departments) {
+    const countRes = await fetch(`${API_BASE}/department/${encodeURIComponent(dept)}/count`);
+    const countData = await countRes.json();
+    const pill = document.createElement('span');
+    pill.className = 'stat-pill';
+    pill.innerHTML = `<span class="dot"></span> ${escapeHtml(dept)} &middot; ${countData.count}`;
+    statsArea.appendChild(pill);
+  }
+}
+
+function renderTable(employees) {
+  const body = document.getElementById('employeeTableBody');
+  body.innerHTML = '';
+  if (employees.length === 0) {
+    body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="big">🗂️</div>No employees found.</div></td></tr>`;
+    return;
+  }
+  for (const emp of employees) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>
+        <div class="person-cell">
+          <div class="avatar">${initials(emp.name)}</div>
+          <div>
+            <div class="person-name">${escapeHtml(emp.name)}</div>
+            <div class="person-email">${escapeHtml(emp.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="dept-badge">${escapeHtml(emp.department)}</span></td>
+      <td class="salary-cell">${emp.salary != null ? '$' + emp.salary.toLocaleString() : '—'}</td>
+      <td>
+        <div class="actions" style="justify-content:flex-end;">
+          <button class="edit-outline" onclick="editEmployee(${emp.id})">Edit</button>
+          <button class="danger-outline" onclick="deleteEmployee(${emp.id})">Delete</button>
+        </div>
+      </td>`;
+    body.appendChild(row);
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+async function saveEmployee() {
+  const id = document.getElementById('employeeId').value;
+  const payload = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    department: document.getElementById('department').value,
+    salary: parseFloat(document.getElementById('salary').value) || null
+  };
+
+  const url = id ? `${API_BASE}/${id}` : API_BASE;
+  const method = id ? 'PUT' : 'POST';
+
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    showMessage(err.fieldErrors ? Object.values(err.fieldErrors).join(', ') : (err.message || 'Something went wrong'), 'error');
+    return;
+  }
+
+  showMessage(id ? 'Employee updated successfully.' : 'Employee added successfully.', 'success');
+  resetForm();
+  loadEmployees();
+}
+
+async function editEmployee(id) {
+  const res = await fetch(`${API_BASE}/${id}`);
+  const emp = await res.json();
+  document.getElementById('employeeId').value = emp.id;
+  document.getElementById('name').value = emp.name;
+  document.getElementById('email').value = emp.email;
+  document.getElementById('department').value = emp.department;
+  document.getElementById('salary').value = emp.salary;
+  document.getElementById('formTitle').textContent = `Edit Employee #${emp.id}`;
+  document.getElementById('saveBtn').textContent = 'Update Employee';
+  document.getElementById('cancelBtn').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+  document.getElementById('employeeId').value = '';
+  document.getElementById('name').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('department').value = '';
+  document.getElementById('salary').value = '';
+  document.getElementById('formTitle').textContent = 'Add Employee';
+  document.getElementById('saveBtn').textContent = 'Add Employee';
+  document.getElementById('cancelBtn').style.display = 'none';
+}
+
+async function deleteEmployee(id) {
+  if (!confirm(`Delete employee #${id}? This cannot be undone.`)) return;
+  const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+  if (res.ok) {
+    showMessage('Employee deleted.', 'success');
+    loadEmployees();
+  } else {
+    showMessage('Could not delete employee.', 'error');
+  }
+}
+
+async function applyFilters() {
+  const name = document.getElementById('searchName').value.trim();
+  const dept = document.getElementById('filterDept').value.trim();
+
+  let url;
+  if (name) {
+    url = `${API_BASE}/search?name=${encodeURIComponent(name)}`;
+  } else if (dept) {
+    url = `${API_BASE}/department/${encodeURIComponent(dept)}`;
+  } else {
+    url = API_BASE;
+  }
+
+  const res = await fetch(url);
+  const employees = await res.json();
+  renderTable(employees);
+}
+
+function showMessage(text, type) {
+  const area = document.getElementById('messageArea');
+  const icon = type === 'success' ? '✓' : '⚠';
+  area.innerHTML = `<div class="msg ${type}"><span>${icon}</span>${escapeHtml(text)}</div>`;
+  setTimeout(() => { area.innerHTML = ''; }, 4000);
+}
+
+loadEmployees();
+</script>
+</body>
+</html>
